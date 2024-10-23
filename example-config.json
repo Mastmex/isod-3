@@ -1,0 +1,17 @@
+{
+  "provider": "providername",
+  "host": "hostname",
+  "api": "apiname",
+  "address": "addressname",
+  "path": {
+    "path1": {
+      "name": "First Level",
+      "path2": {
+        "name": "0",
+        "path3": {
+          "name": "Third Level"
+        }
+      }
+    }
+  }
+}
