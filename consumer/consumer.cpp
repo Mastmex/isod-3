@@ -6,6 +6,10 @@
 #include <amqpcpp.h>
 #include <amqpcpp/libevent.h>
 #include <event2/event.h>
+#include <mysql_driver.h>
+#include <mysql_connection.h>
+#include <cppconn/prepared_statement.h>
+#include <ctime>
 
 using json = nlohmann::json;
 using namespace std;
@@ -18,6 +22,13 @@ struct mq_data
     string password;
     string vhost;
     string queue;
+};
+
+struct db_data
+{
+    string user;
+    string password;
+    string container_name;
 };
 
 mq_data parse_mq_json(string filename)
@@ -34,7 +45,72 @@ mq_data parse_mq_json(string filename)
             data["queue_name"]};
 }
 
-void set_connection(mq_data mq)
+db_data parse_db_json(string filename)
+{
+    ifstream file(filename);
+    json data;
+    file >> data;
+    file.close();
+    return {data["user"],
+            data["password"],
+            data["container_name"]};
+}
+
+void insert_in_db(json load,db_data db)
+{
+     try {
+        // Получаем драйвер MySQL
+        sql::mysql::MySQL_Driver *driver;
+        sql::Connection *con;
+        driver = sql::mysql::get_mysql_driver_instance();
+
+        // Подключаемся к MySQL без указания базы данных, чтобы создать ее
+        con = driver->connect(db.container_name, db.user, db.password);
+
+        // Создание базы данных, если не существует
+        unique_ptr<sql::Statement> stmt(con->createStatement());
+        stmt->execute("CREATE DATABASE IF NOT EXISTS STOCKS");
+
+        // Подключаемся к базе данных
+        con->setSchema("STOCKS");
+
+        // Создание таблицы, если не существует
+        stmt->execute("CREATE TABLE IF NOT EXISTS data ("
+                      "id INT AUTO_INCREMENT PRIMARY KEY,"
+                      "timestamp DATETIME,"
+                      "value DOUBLE,"
+                      "name VARCHAR(50))"); // Добавлен столбец name
+
+        // Подготовить запрос для вставки данных
+        sql::PreparedStatement *pstmt = con->prepareStatement("INSERT INTO testdata (timestamp, value, name) VALUES (?, ?, ?)");
+
+        string value = load["load"];
+        string name = load["name"];
+        // Получаем текущее время
+        time_t now = time(0);
+        double doubleValue = stoi(value); // Пример значения
+        string nameValue = name; // Пример значения для name
+
+        // Установка параметров
+        pstmt->setString(1, asctime(localtime(&now))); // Конвертация времени в строку
+        pstmt->setDouble(2, doubleValue);
+        pstmt->setString(3, nameValue); // Установка значения для name
+
+        // Выполнить запрос
+        pstmt->execute();
+
+        // Освобождение ресурсов
+        delete pstmt;
+        delete con;
+
+        std::cout << "Данные успешно отправлены!" << std::endl;
+    } catch (sql::SQLException &e) {
+        std::cerr << "Ошибка SQL: " << e.what() << std::endl;
+    }
+
+}
+
+void set_connection(mq_data mq,db_data db)
 {
     struct event_base *eventBase = event_base_new();
     AMQP::LibEventHandler handler(eventBase);
@@ -51,7 +127,8 @@ void set_connection(mq_data mq)
     // Обработка полученного сообщения
     channel.consume(requestQueue).onReceived([&](const AMQP::Message &msg, uint64_t deliveryTag, bool redelivered) {
         std::cout << "Received message: " << msg.body() << std::endl;
-        // Подтверждение получения сообщения
+        json data = json::parse(std::string(msg.body(), msg.bodySize()));
+        insert_in_db(data,db);
         channel.ack(deliveryTag);
     });
 
@@ -63,6 +140,7 @@ void set_connection(mq_data mq)
 
 int main() {
     mq_data mq = parse_mq_json("mq-config.json");
-    set_connection(mq);    
+    db_data db = parse_db_json("mysql-config.json");
+    set_connection(mq,db);
     return 0;
 }
