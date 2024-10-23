@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import http.client
 import base64
-
+import requests
 def load_db_config(filename):
     """Загрузка конфигурации базы данных из JSON файла."""
     with open(filename, 'r') as f:
@@ -22,7 +22,7 @@ def fetch_data_from_db(user, password, container_name):
     config = {
         'user': user,
         'password': password,
-        'host': 'localhost',  # или '127.0.0.1', если контейнер запущен локально
+        'host': container_name,  # или '127.0.0.1', если контейнер запущен локально
         'database': 'STOCKS',
     }
 
@@ -35,14 +35,14 @@ def fetch_data_from_db(user, password, container_name):
         query1 = """
             SELECT timestamp, value, name 
             FROM data 
-            WHERE name = 'Название 1' 
+            WHERE name = 'YH Finance' 
             ORDER BY timestamp DESC 
             LIMIT 24;
         """
         query2 = """
             SELECT timestamp, value, name 
             FROM data 
-            WHERE name = 'Название 2' 
+            WHERE name = 'Seeking alpha' 
             ORDER BY timestamp DESC 
             LIMIT 24;
         """
@@ -119,48 +119,19 @@ def plot_data(data1, data2):
     plt.show()
 
 def upload_image_to_imgbb(image_path, api_key):
-    """Загрузка изображения на imgbb."""
-    conn = http.client.HTTPSConnection("api.imgbb.com")
+
+    with open(image_path, "rb") as file:
+        url = "https://api.imgbb.com/1/upload"
+        payload = {
+            "key": api_key,
+            "image": base64.b64encode(file.read()),
+        }
+        res = requests.post(url, payload)
     
-    # Определение заголовков
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
-    # Открытие файла изображения и чтение его в бинарном режиме
-    with open(image_path, 'rb') as img_file:
-        image_data = img_file.read()
-
-    # Кодирование изображения в base64
-    image_base64 = base64.b64encode(image_data).decode('utf-8')
-
-    # Формирование данных для отправки
-    payload = {
-        'image': image_base64,
-        'expiration': 600,
-        'key': api_key
-    }
-
-    # Преобразование данных в JSON
-    json_payload = json.dumps(payload)
-
-    # Отправка POST-запроса
-    conn.request("POST", "/1/upload", json_payload, headers)
-
-    # Получение ответа
-    res = conn.getresponse()
-    data = res.read()
-
-    # Закрытие соединения
-    conn.close()
-
-    # Декодирование ответа
-    response_json = json.loads(data.decode('utf-8'))
-    
-    return response_json
+    return res
 
 # Загрузка конфигурации базы данных
-user, password, container_name = load_db_config('db_config.json')
+user, password, container_name = load_db_config('mysql-config.json')
 
 # Загрузка API ключа
 api_key = load_api_key('api.json')

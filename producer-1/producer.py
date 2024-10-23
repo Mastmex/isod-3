@@ -124,7 +124,7 @@ def main():
 
     # Подготовка и отправка сообщения
     try:
-        message_body = json.dumps({"name": provider, "load": current_price})
+        message_body = json.dumps({"name": provider, "load": str(current_price)})
         channel.basic_publish(
             exchange='',
             routing_key=mq_config['queue_name'],

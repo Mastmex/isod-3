@@ -9,6 +9,7 @@
 #include <mysql_driver.h>
 #include <mysql_connection.h>
 #include <cppconn/prepared_statement.h>
+#include <strstream>
 #include <ctime>
 
 using json = nlohmann::json;
@@ -56,6 +57,14 @@ db_data parse_db_json(string filename)
             data["container_name"]};
 }
 
+string get_formatted_time()
+{
+    time_t now = time(nullptr);
+    tm* localtime = std::localtime(&now);
+    std::ostringstream oss;
+    oss<< std::put_time(localtime,"%Y-%m-%d %H:%M:%S");
+    return oss.str();
+}
 void insert_in_db(json load,db_data db)
 {
      try {
@@ -82,17 +91,16 @@ void insert_in_db(json load,db_data db)
                       "name VARCHAR(50))"); // Добавлен столбец name
 
         // Подготовить запрос для вставки данных
-        sql::PreparedStatement *pstmt = con->prepareStatement("INSERT INTO testdata (timestamp, value, name) VALUES (?, ?, ?)");
+        sql::PreparedStatement *pstmt = con->prepareStatement("INSERT INTO data (timestamp, value, name) VALUES (?, ?, ?)");
 
         string value = load["load"];
         string name = load["name"];
         // Получаем текущее время
-        time_t now = time(0);
         double doubleValue = stoi(value); // Пример значения
         string nameValue = name; // Пример значения для name
 
         // Установка параметров
-        pstmt->setString(1, asctime(localtime(&now))); // Конвертация времени в строку
+        pstmt->setString(1, get_formatted_time()); // Конвертация времени в строку
         pstmt->setDouble(2, doubleValue);
         pstmt->setString(3, nameValue); // Установка значения для name
 
@@ -127,7 +135,8 @@ void set_connection(mq_data mq,db_data db)
     // Обработка полученного сообщения
     channel.consume(requestQueue).onReceived([&](const AMQP::Message &msg, uint64_t deliveryTag, bool redelivered) {
         std::cout << "Received message: " << msg.body() << std::endl;
-        json data = json::parse(std::string(msg.body(), msg.bodySize()));
+        string got_load(msg.body());
+        json data = json::parse(got_load.substr(0, got_load.find("}"))+"}");
         insert_in_db(data,db);
         channel.ack(deliveryTag);
     });

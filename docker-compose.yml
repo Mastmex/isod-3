@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   producer1:
@@ -6,12 +6,20 @@ services:
       context: ./producer-1
     depends_on:
       - rabbitmq
+    ports:
+    - 8010:8010
+    networks:
+      - network
 
   producer2:
     build:
       context: ./producer-2
     depends_on:
       - rabbitmq
+    ports:
+    - 8012:8012
+    networks:
+      - network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -23,6 +31,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - network
 
   consumer:
     build:
@@ -30,6 +40,10 @@ services:
     depends_on:
       - rabbitmq
       - mysql
+    ports:
+    - 8011:8011
+    networks:
+      - network
 
   mysql:
     container_name: my-mysql
@@ -40,9 +54,17 @@ services:
       MYSQL_DATABASE: STOCKS
     ports:
       - "3306:3306"
+    networks:
+      - network
 
   processor:
     build:
       context: ./plotter
     depends_on:
       - mysql
+    ports:
+    - 8013:8013
+    networks:
+      - network
+networks:
+  network: {}

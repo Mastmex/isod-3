@@ -1,2 +1,0 @@
-# Задача cron для запуска consumer в 23 30 каждый день
-30 23 * * * /home/prod/consumer >> /var/log/cron.log 2>&1

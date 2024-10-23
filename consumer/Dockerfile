@@ -1,6 +1,6 @@
 FROM debian:bookworm-20241016
 RUN apt-get update && \
-    apt-get install -y g++ libcurl4-openssl-dev libssl-dev git libevent-dev cron libmysqlcppconn-dev libmariadb-dev make && \
+    apt-get install -y g++ libcurl4-openssl-dev libssl-dev git libevent-dev libmysqlcppconn-dev libmariadb-dev make && \
     apt-get clean
 
     # Создаем папку ~/prod
@@ -24,19 +24,19 @@ WORKDIR /tmp/amqp
 RUN make 
 RUN make install
 
+RUN apt-get update && \
+    apt-get install -y gdb && \
+    apt-get clean
+
+    RUN apt-get update && \
+    apt-get install -y curl && \
+    apt-get clean
+
 # Переходим в папку сборки и собираем программу
 WORKDIR /home/prod/
-RUN g++ consumer.cpp -o consumer -lamqpcpp -levent -lcurl -I/usr/local/include -lmysqlcppconn
+RUN g++ consumer.cpp -o consumer -lamqpcpp -levent -lcurl -I/usr/local/include -lmysqlcppconn -g
 
-# Копируем файл cron в контейнер
-COPY consumer-cron /etc/cron.d/consumer-cron
+COPY tt.sh /home/prod/
 
-# Устанавливаем права доступа и добавляем cron задачу
-RUN chmod 0644 /etc/cron.d/consumer-cron && \
-    crontab /etc/cron.d/consumer-cron
-
-# Создаем файл для логов cron
-RUN touch /var/log/cron.log
-
-# Запускаем cron в фоновом режиме и выводим логи
-CMD cron && tail -f /var/log/cron.log
+# Запускаем обработчик в фоновом режиме и выводим логи
+CMD ["bash", "tt.sh"]

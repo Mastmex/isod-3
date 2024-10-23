@@ -1,5 +1,5 @@
 {
-    "hostname" : "localhost",
+    "hostname" : "my-rabbit",
     "port" : "5672",
     "login" : "user",
     "password" : "password",

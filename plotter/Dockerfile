@@ -12,7 +12,7 @@ COPY api.json /home/prod/
 
 # Создаем виртуальное окружение и устанавливаем pika
 RUN python3 -m venv /home/prod/myenv && \
-    /home/prod/myenv/bin/pip install mysql-connector-python matplotlib pandas
+    /home/prod/myenv/bin/pip install mysql-connector-python matplotlib pandas requests
 
 # Копируем файл cron в контейнер
 COPY plotter-cron /etc/cron.d/plotter-cron
