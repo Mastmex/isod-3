@@ -1,6 +1,6 @@
 FROM debian:bookworm-20241016
 RUN apt-get update && \
-    apt-get install -y g++ libcurl4-openssl-dev libssl-dev git libevent-dev cron libmysqlcppconn-dev libmariadb-dev && \
+    apt-get install -y g++ libcurl4-openssl-dev libssl-dev git libevent-dev cron libmysqlcppconn-dev libmariadb-dev make && \
     apt-get clean
 
     # Создаем папку ~/prod

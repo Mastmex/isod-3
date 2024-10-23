@@ -2,7 +2,7 @@ FROM debian:bookworm-20241016
 
 # Устанавливаем необходимые пакеты
 RUN apt-get update && \
-    apt-get install -y g++ libcurl4-openssl-dev libssl-dev git libevent-dev cron && \
+    apt-get install -y g++ libcurl4-openssl-dev libssl-dev git libevent-dev cron make && \
     apt-get clean
 
 # Создаем папку ~/prod
