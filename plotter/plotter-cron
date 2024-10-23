@@ -1,2 +1,2 @@
-# Задача cron для запуска plotter.py каждый час
-50 23 * * * /home/prod/myenv/bin/python /home/prod/plotter.py >> /var/log/plotter.log 2>&1
+# Задача cron для запуска plotter.py каждые сутки
+50 23 * * * cd /home/prod/ && /home/prod/myenv/bin/python /home/prod/plotter.py >> /var/log/plotter.log 2>&1

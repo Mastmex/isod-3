@@ -1,2 +1,2 @@
 # Задача cron для запуска producer каждый час
-0 * * * * /home/prod/producer >> /var/log/cron.log 2>&1
+0 * * * * cd /home/prod && /home/prod/producer >> /var/log/cron.log 2>&1

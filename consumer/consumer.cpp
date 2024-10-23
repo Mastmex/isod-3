@@ -96,7 +96,7 @@ void insert_in_db(json load,db_data db)
         string value = load["load"];
         string name = load["name"];
         // Получаем текущее время
-        double doubleValue = stoi(value); // Пример значения
+        double doubleValue = stod(value); // Пример значения
         string nameValue = name; // Пример значения для name
 
         // Установка параметров
