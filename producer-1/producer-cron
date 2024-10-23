@@ -1,2 +1,2 @@
 # Задача cron для запуска producer.py каждый час
-0 * * * * python3 /home/prod/producer.py >> /var/log/cron.log 2>&1
+0 * * * * /home/prod/myenv/bin/python /home/prod/producer.py >> /var/log/producer.log 2>&1

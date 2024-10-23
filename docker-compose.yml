@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  producer1:
+    build:
+      context: ./producer-1
+    depends_on:
+      - rabbitmq
+
+  producer2:
+    build:
+      context: ./producer-2
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: my-rabbit
+    ports:
+      - "5672:5672"       # AMQP
+      - "15672:15672"     # Management UI
+      - "8080:8080"       # HTTP (если используется)
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - rabbitmq-net
+
+  consumer:
+    build:
+      context: ./consumer
+    depends_on:
+      - rabbitmq
+      - mysql
+
+  mysql:
+    build:
+      context: ./mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: STOCKS
+    ports:
+      - "3306:3306"
+
+  processor:
+    build:
+      context: ./plotter
+    depends_on:
+      - mysql

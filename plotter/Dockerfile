@@ -6,20 +6,20 @@ RUN apt-get update && \
     apt-get clean
 
 # Копируем необходимые файлы
-COPY producer.py /home/prod/
-COPY config.json /home/prod/
-COPY mq-config.json /home/prod/
+COPY plotter.py /home/prod/
+COPY mysql-config.json /home/prod/
+COPY api.json /home/prod/
 
 # Создаем виртуальное окружение и устанавливаем pika
 RUN python3 -m venv /home/prod/myenv && \
-    /home/prod/myenv/bin/pip install pika
+    /home/prod/myenv/bin/pip install mysql-connector-python matplotlib pandas
 
 # Копируем файл cron в контейнер
-COPY producer-cron /etc/cron.d/producer-cron
+COPY plotter-cron /etc/cron.d/plotter-cron
 
 # Устанавливаем права доступа и добавляем cron задачу
-RUN chmod 0644 /etc/cron.d/producer-cron && \
-    crontab /etc/cron.d/producer-cron
+RUN chmod 0644 /etc/cron.d/plotter-cron && \
+    crontab /etc/cron.d/plotter-cron
 
 # Создаем файл для логов cron
 RUN touch /var/log/cron.log
