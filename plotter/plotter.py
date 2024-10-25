@@ -86,6 +86,15 @@ def plot_data(data1, data2):
     df1.sort_index(inplace=True)
     df2.sort_index(inplace=True)
 
+    # Получение последней даты для заголовка графика
+    last_date1 = df1.index[-1].date()
+    last_date2 = df2.index[-1].date()
+
+    # Определение самой поздней даты среди двух наборов данных
+    last_date = max(last_date1, last_date2)
+    day = last_date.day
+    month = last_date.month
+
     # Построение графика
     plt.figure(figsize=(10, 6))
 
@@ -109,7 +118,10 @@ def plot_data(data1, data2):
     plt.xticks(rotation=45)
     plt.xlabel('Время')
     plt.ylabel('Значение')
-    plt.title('График значений')
+
+    # Динамическое название графика с последней датой
+    plt.title(f'График значений за {day}-{month}')
+    
     plt.legend()
     plt.grid()
     
