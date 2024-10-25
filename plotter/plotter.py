@@ -101,17 +101,17 @@ def plot_data(data1, data2):
     # Первый набор данных
     plt.plot(df1.index, df1['Значение'], marker='o', label=data1[0][2], color='blue')
     
-    # Подписи для первого набора данных
+    # Подписи для первого набора данных: слева сверху с небольшим смещением
     for i in range(len(df1)):
-        plt.text(df1.index[i], df1['Значение'].iloc[i], str(df1['Значение'].iloc[i]), 
-                 verticalalignment='bottom', horizontalalignment='right', color='blue')
+        plt.text(df1.index[i], df1['Значение'].iloc[i] + 0.05, str(df1['Значение'].iloc[i]), 
+                 verticalalignment='top', horizontalalignment='left', color='blue')
 
     # Второй набор данных
     plt.plot(df2.index, df2['Значение'], marker='o', label=data2[0][2], color='orange')
 
-    # Подписи для второго набора данных
+    # Подписи для второго набора данных: справа снизу с небольшим смещением
     for i in range(len(df2)):
-        plt.text(df2.index[i], df2['Значение'].iloc[i], str(df2['Значение'].iloc[i]), 
+        plt.text(df2.index[i], df2['Значение'].iloc[i] - 0.05, str(df2['Значение'].iloc[i]), 
                  verticalalignment='bottom', horizontalalignment='right', color='orange')
 
     # Форматирование оси X для отображения времени
@@ -120,7 +120,7 @@ def plot_data(data1, data2):
     plt.ylabel('Значение')
 
     # Динамическое название графика с последней датой
-    plt.title(f'График значений за {day}-{month}')
+    plt.title(f'График значений акций Tesla за {day}-{month}')
     
     plt.legend()
     plt.grid()
