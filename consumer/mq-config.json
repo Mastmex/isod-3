@@ -2,7 +2,7 @@
     "hostname" : "my-rabbit",
     "port" : "5672",
     "login" : "user",
-    "password" : "password",
+    "password" : "sdfwefgsrRdsFSDF3rsdfSDF345fsSDF",
     "virtual_host" : "/",
     "queue_name" : "TSLA"
 }

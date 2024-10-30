@@ -1,5 +1,7 @@
 services:
+  
   producer1:
+    container_name: producer-1
     build:
       context: ./producer-1
     depends_on:
@@ -10,6 +12,7 @@ services:
       - network
 
   producer2:
+    container_name: producer-2
     build:
       context: ./producer-2
     depends_on:
@@ -28,11 +31,12 @@ services:
       - "8080:8080"       # HTTP (если используется)
     environment:
       RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_PASS: "sdfwefgsrRdsFSDF3rsdfSDF345fsSDF"
     networks:
       - network
 
   consumer:
+    container_name: consumer
     build:
       context: ./consumer
     depends_on:
@@ -48,14 +52,17 @@ services:
     build:
       context: ./mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: "jdui8932erhfASDgsn7823"
       MYSQL_DATABASE: STOCKS
+    volumes:
+      - mysql_data:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
       - network
 
-  processor:
+  plotter:
+    container_name: plotter
     build:
       context: ./plotter
     depends_on:
@@ -64,5 +71,10 @@ services:
     - 8013:8013
     networks:
       - network
+
 networks:
   network: {}
+
+volumes:
+  mysql_data:
+    driver: local 
